@@ -1,0 +1,19 @@
+{%extends "base.html"%}
+{%block title%}Meme {%endblock%}
+
+
+{%block content%}
+<form method="POST">
+    <h3 align="center">Meme</h3>
+    <div class="form-group">
+        <label>Press a button</label>
+        <button type="submit" class="btn btn-primary" name="btn1" value="btn1">Number 1</button>
+        <button type="submit" class="btn btn-primary" name="btn2" value="btn2">Number 2</button>
+        <button type="submit" class="btn btn-primary" name="btn3" value="btn3">Number 3</button>
+        <button type="submit" class="btn btn-primary" name="btn4" value="btn4">Get API Data</button>
+    </div>
+</form>
+<div>
+    <h1>{{output}}</h1>
+</div>
+{%endblock%}
