@@ -7,6 +7,10 @@ import time
 from io import BytesIO
 import re
 import pprint
+from .models import data_sources
+from . import db
+from sqlalchemy.inspection import inspect
+import ast
 
 def perform_ntlm_authenticated_request(url, username, password):
     buffer = BytesIO()
@@ -99,54 +103,8 @@ async def main(urls,username,password):
         jsons = await fetch_all_data(urls,username,password)
     return jsons
 
-# if __name__ == '__main__':
-#     start_time = time.time()
-#     listFolder = ""
-#     out=[]
-#     username = "administrator"
-#     password = "77@NguyenQuyDuc"
-#     findFolders(listFolder,out) #now 'out' list has been filled
-#     print("Exec time lasted --- %s seconds ---" % (time.time() - start_time))
 
-#     display_id = [] 
-#     allFolders = out
-#     findDislays(allFolders,display_id)
-#     display_id.sort()
-#     print("Exec time lasted --- %s seconds ---" % (time.time() - start_time))
-
-#     #this is the total number of displays in PI Vision
-#     #print(len(display_id)) 
-
-#     urls = [f"https://192.168.10.202/pivision/utility/api/v1/displays/{graphic}/export" for graphic in display_id]
-
-#     #jsons = await main()
-
-#     inverse = {}
-#     for k, v in jsons.items():
-#         if v != []:
-#             for x in v:
-#                 if isinstance(x, list):
-#                     for item in x:
-#                         inverse.setdefault(item, []).append(k)
-#                 else:
-#                     inverse.setdefault(x, []).append(k)
-
-#     print("The dictionary has " + str(len(inverse)) + " entries.")
-#     print("Exec time lasted --- %s seconds ---" % (time.time() - start_time))
-
-
-
-
-# search_key = 'hiệu'
-
-# #res = dict(filter(lambda item: search_key in item[0], inverse.items()))
-
-# res = search_wildcards(inverse,search_key)
-# print(f"{str(len(res))} results found...")
-
-# pprint.pprint(res)
-
-async def doit():
+async def memify():
     start_time = time.time()
     listFolder = ""
     out=[]
@@ -162,9 +120,8 @@ async def doit():
     print("Exec time lasted --- %s seconds ---" % (time.time() - start_time))
 
     urls = [f"https://192.168.10.202/pivision/utility/api/v1/displays/{graphic}/export" for graphic in display_id]
-
+    
     jsons = await main(urls,username,password)
-
 
     inverse = {}
     for k, v in jsons.items():
@@ -175,7 +132,23 @@ async def doit():
                         inverse.setdefault(item, []).append(k)
                 else:
                     inverse.setdefault(x, []).append(k)
+    
 
-    print("The dictionary has " + str(len(inverse)) + " entries.")
-    print("Exec time lasted --- %s seconds ---" % (time.time() - start_time))
-    return len(invere)
+    if data_sources.query.count() != 0:
+        # Clear existing data from the table
+        db.session.query(data_sources).delete()
+
+    sources_to_add = [data_sources(name=key,display=json.dumps(value)) for key, value in inverse.items()]
+
+    #add all new data sources
+    db.session.add_all(sources_to_add)
+    db.session.commit()
+    return str(len(inverse))
+
+# Function to safely convert string to list using ast.literal_eval
+def convert_to_list(value):
+    try:
+        return ast.literal_eval(value)
+    except (SyntaxError, ValueError):
+        # If the value cannot be converted, return it as is
+        return value
