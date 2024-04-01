@@ -129,9 +129,9 @@ async def memify():
             for x in v:
                 if isinstance(x, list):
                     for item in x:
-                        inverse.setdefault(item, []).append(k)
+                        inverse.setdefault(item, set()).add(k)
                 else:
-                    inverse.setdefault(x, []).append(k)
+                    inverse.setdefault(x, set()).add(k)
     
 
     if data_sources.query.count() != 0:
@@ -152,3 +152,10 @@ def convert_to_list(value):
     except (SyntaxError, ValueError):
         # If the value cannot be converted, return it as is
         return value
+
+def convert_to_set(value):
+    try:
+        return {ast.literal_eval(value)}
+    except (SyntaxError, ValueError):
+        # If the value cannot be converted, return it as is
+        return {value}

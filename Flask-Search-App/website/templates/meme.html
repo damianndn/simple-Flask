@@ -49,11 +49,11 @@
             <th>Results</th>
         </tr>
         {% for res in results %}
-            <tr>
-                <td><b>{{res.name}}</b></td>
+            <tr class="clicker">
+                <td>{{res.name}}</td>
             </tr>
             {% for dis in dis_as_list[loop.index-1] %}
-            <tr>
+            <tr class="clicker-content">
                 <td>{{dis}}</td>
             </tr>
             {% endfor %}
@@ -61,4 +61,5 @@
         {% endfor %}
     </table>
 </div>
+<script src="{{ url_for('static', filename='js/clicker.js') }}"></script>
 {%endblock%}

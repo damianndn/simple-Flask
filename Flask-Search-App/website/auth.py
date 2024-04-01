@@ -100,3 +100,7 @@ async def meme():
 @auth.route('/meme',methods=['GET'])
 def newmeme():
     return render_template("meme.html",output='')
+
+@auth.route('/test',methods=['GET'])
+def test():
+    return render_template("test.html")
